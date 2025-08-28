@@ -242,7 +242,7 @@ Important reminders:
 - In the library API documentation if the service type is specified as generic, adhere to the instructions specified there on writing the service.
 - For GraphQL service related queries, If the user haven't specified their own GraphQL Scehma, Write the proposed GraphQL schema for the user query right after explanation before generating the ballerina code. Use same names as the GraphQL Schema when defining record types.
 
-Begin your response with the explanation, once the entire explanation is finished only, include codeblock segments(if any) in the end of the response. 
+Begin your response with the explanation with the same language as the user query, once the entire explanation is finished only, include codeblock segments(if any) in the end of the response. 
 The explanation should explain the control flow decided in step 2, along with the selected libraries and their functions.
 
 Each file which needs modifications, should have a codeblock segment and it MUST have complete file content with the proposed change. 
