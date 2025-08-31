@@ -84,6 +84,20 @@ export async function fetchWithAuth(input: string | URL | Request, options: Requ
  */
 export const getAnthropicClient = async (model: AnthropicModel) => {
     const loginMethod = await getLoginMethod();
+    
+    // Test environment fallback - if no login method but ANTHROPIC_API_KEY exists
+    const testApiKey = process.env.ANTHROPIC_API_KEY;
+    const isTestEnv = process.env.AI_TEST_ENV === 'true';
+    
+    if (!loginMethod && isTestEnv && testApiKey && testApiKey.trim() !== "") {
+        console.log("Using test environment BYOK with direct API key");
+        cachedAnthropic = createAnthropic({
+            baseURL: "https://api.anthropic.com/v1",
+            apiKey: testApiKey.trim(),
+        });
+        cachedAuthMethod = LoginMethod.ANTHROPIC_KEY; // Set for consistency
+        return cachedAnthropic(model);
+    }
 
     // Recreate client if login method has changed or no cached instance
     if (!cachedAnthropic || cachedAuthMethod !== loginMethod) {
