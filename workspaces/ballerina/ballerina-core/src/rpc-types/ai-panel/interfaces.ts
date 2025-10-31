@@ -435,3 +435,13 @@ export interface DocGenerationRequest {
 
 export const GENERATE_TEST_AGAINST_THE_REQUIREMENT = "Generate tests against the requirements";
 export const GENERATE_CODE_AGAINST_THE_REQUIREMENT = "Generate code based on the requirements";
+
+// Usage
+export interface BIIntelUsageData {
+    resetPeriodWeeks: number;
+    remainingUsagePercentage: number;
+}
+
+export type UsageDataResponse =
+    | { isBIIntel: true; usageData: BIIntelUsageData }
+    | { isBIIntel: false };

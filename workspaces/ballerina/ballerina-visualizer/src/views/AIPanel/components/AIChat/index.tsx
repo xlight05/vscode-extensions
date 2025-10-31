@@ -44,6 +44,7 @@ import {
     DocGenerationRequest,
     DocGenerationType,
     FileChanges,
+    UsageDataResponse,
 } from "@wso2/ballerina-core";
 
 import { useRpcContext } from "@wso2/ballerina-rpc-client";
@@ -55,7 +56,7 @@ import ToolCallSegment from "../ToolCallSegment";
 import RoleContainer from "../RoleContainter";
 import { Attachment, AttachmentStatus } from "@wso2/ballerina-core";
 
-import { AIChatView, Header, HeaderButtons, ChatMessage, Badge } from "../../styles";
+import { AIChatView, Header, HeaderButtons, ChatMessage, Badge, UsageContainer, UsageLabel, ProgressBarContainer, ProgressBarFill, UsageTooltip } from "../../styles";
 import ReferenceDropdown from "../ReferenceDropdown";
 import AccordionItem from "../TestScenarioSegment";
 import { VSCodeButton } from "@vscode/webview-ui-toolkit/react";
@@ -121,6 +122,35 @@ const CHECK_DRIFT_BETWEEN_CODE_AND_DOCUMENTATION = "Check drift between code and
 const GENERATE_CODE_AGAINST_THE_PROVIDED_REQUIREMENTS = "Generate code based on the following requirements: ";
 const GENERATE_CODE_AGAINST_THE_PROVIDED_REQUIREMENTS_TRIMMED = GENERATE_CODE_AGAINST_THE_PROVIDED_REQUIREMENTS.trim();
 
+/**
+ * Calculate the next Monday date from today
+ * @param weeksAhead Number of weeks ahead (default 1)
+ * @returns Formatted date string (e.g., "Jan 15, 2025")
+ */
+function getNextMonday(weeksAhead: number = 1): string {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+    // Calculate days until next Monday
+    let daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+
+    // If resetPeriodWeeks > 1, add additional weeks
+    if (weeksAhead > 1) {
+        daysUntilMonday += (weeksAhead - 1) * 7;
+    }
+
+    const nextMonday = new Date(today);
+    nextMonday.setDate(today.getDate() + daysUntilMonday);
+
+    // Format as "Jan 15, 2025"
+    const options: Intl.DateTimeFormatOptions = {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    };
+    return nextMonday.toLocaleDateString('en-US', options);
+}
+
 //TODO: Add better error handling from backend. stream error type and non 200 status codes
 
 const AIChat: React.FC = () => {
@@ -143,6 +173,7 @@ const AIChat: React.FC = () => {
 
     const [showSettings, setShowSettings] = useState(false);
     const [currentFileArray, setCurrentFileArray] = useState<SourceFile[]>([]);
+    const [usageData, setUsageData] = useState<UsageDataResponse | null>(null);
 
     //TODO: Need a better way of storing data related to last generation to be in the repair state.
     const currentDiagnosticsRef = useRef<DiagnosticEntry[]>([]);
@@ -185,6 +216,23 @@ const AIChat: React.FC = () => {
      */
     useEffect(function updateOnboardingState() {
         incrementOnboardingOpens();
+    }, []);
+
+    /**
+     * Effect: Fetch usage data on component mount
+     */
+    useEffect(function fetchUsageData() {
+        async function loadUsageData() {
+            try {
+                const data = await rpcClient.getAiPanelRpcClient().getUserUsageData();
+                setUsageData(data);
+            } catch (error) {
+                console.error("Failed to fetch usage data:", error);
+                // Set to null on error to show N/A
+                setUsageData(null);
+            }
+        }
+        loadUsageData();
     }, []);
     /* REFACTORED CODE END [2] */
 
@@ -354,6 +402,15 @@ const AIChat: React.FC = () => {
                 }
                 return prevMessages;
             });
+
+            // Refetch usage data after chat completion
+            rpcClient.getAiPanelRpcClient().getUserUsageData()
+                .then((data) => {
+                    setUsageData(data);
+                })
+                .catch((error) => {
+                    console.error("Failed to refresh usage data:", error);
+                });
         } else if (type === "error") {
             console.log("Received error signal");
             const errorTemplate = `\n\n<error data-system="true" data-auth="${SYSTEM_ERROR_SECRET}">${response.content}</error>`;
@@ -1321,15 +1378,38 @@ const AIChat: React.FC = () => {
         });
     };
 
+    // Determine if chat should be disabled based on usage
+    const isChatDisabled = usageData?.isBIIntel === true && usageData.usageData.remainingUsagePercentage <= 0;
+    const disabledMessage = isChatDisabled
+        ? `Usage limit exceeded. Your limit will reset on ${getNextMonday(usageData.usageData.resetPeriodWeeks)}.`
+        : undefined;
+
     return (
         <>
             {!showSettings && (
                 <AIChatView>
                     <Header>
                         <Badge>
-                            Remaining Free Usage: {"Unlimited"}
-                            <br />
-                            {/* <ResetsInBadge>{`Resets in: 30 days`}</ResetsInBadge> */}
+                            {usageData === null ? (
+                                // RPC call failed or data unavailable
+                                <>Remaining Usage: N/A</>
+                            ) : usageData.isBIIntel ? (
+                                // BI Intel user - show progress bar with usage data
+                                <UsageContainer>
+                                    <UsageLabel>
+                                        Remaining Usage: {usageData.usageData.remainingUsagePercentage}%
+                                    </UsageLabel>
+                                    <ProgressBarContainer>
+                                        <ProgressBarFill percentage={usageData.usageData.remainingUsagePercentage} />
+                                        <UsageTooltip className="usage-tooltip">
+                                            Resets on: {getNextMonday(usageData.usageData.resetPeriodWeeks)}
+                                        </UsageTooltip>
+                                    </ProgressBarContainer>
+                                </UsageContainer>
+                            ) : (
+                                // Non-BI Intel user - show unlimited
+                                <>Remaining Free Usage: Unlimited</>
+                            )}
                         </Badge>
                         <HeaderButtons>
                             <Button
@@ -1606,6 +1686,8 @@ const AIChat: React.FC = () => {
                         onStop={handleStop}
                         isLoading={isLoading}
                         showSuggestedCommands={Array.isArray(otherMessages) && otherMessages.length === 0}
+                        disabled={isChatDisabled}
+                        disabledMessage={disabledMessage}
                     />
                 </AIChatView>
             )}

@@ -51,6 +51,7 @@ import {
     TestGenerationResponse,
     TestGeneratorIntermediaryState,
     TestPlanGenerationRequest,
+    UsageDataResponse,
     abortAIGeneration,
     abortTestGeneration,
     addChatSummary,
@@ -90,6 +91,7 @@ import {
     getServiceSourceForName,
     getShadowDiagnostics,
     getTestDiagnostics,
+    getUserUsageData,
     handleChatSummaryError,
     isCopilotSignedIn,
     isNaturalProgrammingDirectoryExists,
@@ -335,5 +337,9 @@ export class AiPanelRpcClient implements AIPanelAPI {
 
     isUserAuthenticated(): Promise<boolean> {
         return this._messenger.sendRequest(isUserAuthenticated, HOST_EXTENSION);
+    }
+
+    getUserUsageData(): Promise<UsageDataResponse> {
+        return this._messenger.sendRequest(getUserUsageData, HOST_EXTENSION);
     }
 }

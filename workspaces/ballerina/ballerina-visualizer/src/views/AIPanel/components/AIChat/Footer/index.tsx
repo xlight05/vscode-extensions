@@ -78,6 +78,8 @@ type FooterProps = {
     onStop: () => void;
     isLoading: boolean;
     showSuggestedCommands: boolean;
+    disabled?: boolean;
+    disabledMessage?: string;
 };
 
 const Footer: React.FC<FooterProps> = ({
@@ -89,9 +91,24 @@ const Footer: React.FC<FooterProps> = ({
     onStop,
     isLoading,
     showSuggestedCommands,
+    disabled = false,
+    disabledMessage,
 }) => {
     return (
         <FooterContainer>
+            {disabled && disabledMessage && (
+                <div style={{
+                    padding: '8px 12px',
+                    marginBottom: '8px',
+                    backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
+                    border: '1px solid var(--vscode-inputValidation-errorBorder)',
+                    borderRadius: '4px',
+                    color: 'var(--vscode-inputValidation-errorForeground)',
+                    fontSize: '12px'
+                }}>
+                    {disabledMessage}
+                </div>
+            )}
             {showSuggestedCommands && (
                 <SuggestedCommandsWrapper>
                     {suggestedCommandTemplates.map((item, index) => renderPrompt(item, index, aiChatInputRef))}
@@ -106,6 +123,7 @@ const Footer: React.FC<FooterProps> = ({
                 onSend={onSend}
                 onStop={onStop}
                 isLoading={isLoading}
+                disabled={disabled}
             />
         </FooterContainer>
     );

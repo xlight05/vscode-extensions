@@ -66,3 +66,61 @@ export const Badge = styled.div`
 export const ResetsInBadge = styled.div`
     font-size: 10px;
 `;
+
+export const UsageContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+`;
+
+export const UsageLabel = styled.div`
+    font-size: 12px;
+`;
+
+export const ProgressBarContainer = styled.div`
+    position: relative;
+    width: 150px;
+    height: 8px;
+    background-color: var(--vscode-inputValidation-errorBackground);
+    border-radius: 4px;
+    overflow: visible;
+    cursor: pointer;
+
+    &:hover .usage-tooltip {
+        opacity: 1;
+    }
+`;
+
+interface ProgressBarFillProps {
+    percentage: number;
+}
+
+export const ProgressBarFill = styled.div<ProgressBarFillProps>`
+    height: 100%;
+    width: ${(props: ProgressBarFillProps) => props.percentage}%;
+    background-color: ${(props: ProgressBarFillProps) => {
+        if (props.percentage > 50) return '#4caf50'; // Green
+        if (props.percentage > 20) return '#ff9800'; // Orange
+        return '#f44336'; // Red
+    }};
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 4px;
+`;
+
+export const UsageTooltip = styled.div`
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    background-color: var(--vscode-editorHoverWidget-background);
+    border: 1px solid var(--vscode-editorHoverWidget-border);
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+`;

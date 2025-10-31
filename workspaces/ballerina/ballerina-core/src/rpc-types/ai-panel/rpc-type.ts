@@ -19,7 +19,7 @@
  */
 import { DataMapperModelResponse } from "../../interfaces/extended-lang-client";
 import { LoginMethod } from "../../state-machine-types";
-import { AddToProjectRequest, GetFromFileRequest, DeleteFromProjectRequest, ProjectSource, ProjectDiagnostics, PostProcessRequest, PostProcessResponse, FetchDataRequest, FetchDataResponse, TestGenerationRequest, TestGenerationResponse, TestGenerationMentions, AIChatSummary, DeveloperDocument, RequirementSpecification, LLMDiagnostics, GetModuleDirParams, AIPanelPrompt, AIMachineSnapshot, SubmitFeedbackRequest, RelevantLibrariesAndFunctionsRequest, GenerateOpenAPIRequest, GenerateCodeRequest, TestPlanGenerationRequest, TestGeneratorIntermediaryState, RepairParams, RelevantLibrariesAndFunctionsResponse, DocGenerationRequest, AddFilesToProjectRequest, MetadataWithAttachments, DatamapperModelContext, ProcessContextTypeCreationRequest, ProcessMappingParametersRequest } from "./interfaces";
+import { AddToProjectRequest, GetFromFileRequest, DeleteFromProjectRequest, ProjectSource, ProjectDiagnostics, PostProcessRequest, PostProcessResponse, FetchDataRequest, FetchDataResponse, TestGenerationRequest, TestGenerationResponse, TestGenerationMentions, AIChatSummary, DeveloperDocument, RequirementSpecification, LLMDiagnostics, GetModuleDirParams, AIPanelPrompt, AIMachineSnapshot, SubmitFeedbackRequest, RelevantLibrariesAndFunctionsRequest, GenerateOpenAPIRequest, GenerateCodeRequest, TestPlanGenerationRequest, TestGeneratorIntermediaryState, RepairParams, RelevantLibrariesAndFunctionsResponse, DocGenerationRequest, AddFilesToProjectRequest, MetadataWithAttachments, DatamapperModelContext, ProcessContextTypeCreationRequest, ProcessMappingParametersRequest, UsageDataResponse } from "./interfaces";
 import { RequestType, NotificationType } from "vscode-messenger-common";
 
 const _preFix = "ai-panel";
@@ -78,3 +78,4 @@ export const abortAIGeneration: NotificationType<void> = { method: `${_preFix}/a
 export const getGeneratedDocumentation: NotificationType<DocGenerationRequest> = { method: `${_preFix}/getGeneratedDocumentation` };
 export const addFilesToProject: RequestType<AddFilesToProjectRequest, boolean> = { method: `${_preFix}/addFilesToProject` };
 export const isUserAuthenticated: RequestType<void, boolean> = { method: `${_preFix}/isUserAuthenticated` };
+export const getUserUsageData: RequestType<void, UsageDataResponse> = { method: `${_preFix}/getUserUsageData` };

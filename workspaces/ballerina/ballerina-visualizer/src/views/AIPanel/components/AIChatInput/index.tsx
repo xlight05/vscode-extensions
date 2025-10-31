@@ -125,10 +125,11 @@ interface AIChatInputProps {
     onSend: (content: { input: Input[]; attachments: Attachment[]; metadata?: Record<string, any> }) => Promise<void>;
     onStop: () => void;
     isLoading: boolean;
+    disabled?: boolean;
 }
 
 const AIChatInput = forwardRef<AIChatInputRef, AIChatInputProps>(
-    ({ initialCommandTemplate, tagOptions, attachmentOptions, placeholder, onSend, onStop, isLoading }, ref) => {
+    ({ initialCommandTemplate, tagOptions, attachmentOptions, placeholder, onSend, onStop, isLoading, disabled = false }, ref) => {
         const [inputValue, setInputValue] = useState<{
             text: string;
             [key: string]: any;
@@ -534,6 +535,7 @@ const AIChatInput = forwardRef<AIChatInputRef, AIChatInputProps>(
                             onBlur={() => completeSuggestionSelection()}
                             placeholder={placeholder}
                             onPostDOMUpdate={executeOnPostDOMUpdate}
+                            disabled={disabled}
                         />
                         {/* Attachments Display */}
                         {attachments.length > 0 && (
@@ -554,7 +556,7 @@ const AIChatInput = forwardRef<AIChatInputRef, AIChatInputProps>(
                             <div style={{ display: "flex" }}>
                                 <ActionButton
                                     title="Chat with Command"
-                                    disabled={inputValue.text !== ""}
+                                    disabled={disabled || inputValue.text !== ""}
                                     onClick={() => {
                                         inputRef.current?.insertTextAtCursor({ text: "/" });
                                     }}
@@ -569,14 +571,14 @@ const AIChatInput = forwardRef<AIChatInputRef, AIChatInputProps>(
                                     ref={fileInputRef}
                                     onChange={onAttachmentSelection}
                                 />
-                                <ActionButton title="Attach Context" onClick={handleAttachClick}>
+                                <ActionButton title="Attach Context" disabled={disabled} onClick={handleAttachClick}>
                                     <Codicon name="new-file" />
                                 </ActionButton>
                             </div>
                             <div>
                                 <ActionButton
                                     title={isLoading ? "Stop (Escape)" : "Send (Enter)"}
-                                    disabled={inputValue.text.trim() === "" && !isLoading}
+                                    disabled={disabled || (inputValue.text.trim() === "" && !isLoading)}
                                     onClick={isLoading ? handleStop : handleSend}
                                 >
                                     <span

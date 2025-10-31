@@ -58,7 +58,8 @@ import {
     TestGenerationRequest,
     TestGenerationResponse,
     TestGeneratorIntermediaryState,
-    TestPlanGenerationRequest
+    TestPlanGenerationRequest,
+    UsageDataResponse,
 } from "@wso2/ballerina-core";
 import * as crypto from 'crypto';
 import * as fs from 'fs';
@@ -73,6 +74,7 @@ import { fetchWithAuth } from "../../../src/features/ai/service/connection";
 import { generateContextTypes, generateInlineMappingCode, generateMappingCode, openChatWindowWithCommand } from "../../../src/features/ai/service/datamapper/datamapper";
 import { generateOpenAPISpec } from "../../../src/features/ai/service/openapi/openapi";
 import { AIStateMachine } from "../../../src/views/ai-panel/aiMachine";
+import { checkToken } from "../../../src/views/ai-panel/utils";
 import { extension } from "../../BalExtensionContext";
 import { generateCode, triggerGeneratedCodeRepair } from "../../features/ai/service/code/code";
 import { generateDocumentationForService } from "../../features/ai/service/documentation/doc_generator";
@@ -100,7 +102,8 @@ import {
 import { attemptRepairProject, checkProjectDiagnostics } from "./repair-utils";
 import { AIPanelAbortController, addToIntegration, cleanDiagnosticMessages, isErrorCode, requirementsSpecification, searchDocumentation } from "./utils";
 import { fetchData } from "./utils/fetch-data-utils";
-import { checkToken } from "../../../src/views/ai-panel/utils";
+
+let usage = 90;
 
 export class AiPanelRpcManager implements AIPanelAPI {
 
@@ -716,6 +719,18 @@ export class AiPanelRpcManager implements AIPanelAPI {
         } catch (error) {
             return false;
         }
+    }
+
+    async getUserUsageData(): Promise<UsageDataResponse> {
+        //TODO: Implement real usage data fetching
+        usage = usage - 20;
+        return {
+            isBIIntel : true,
+            usageData : {
+                resetPeriodWeeks: 1,
+                remainingUsagePercentage : usage
+            }
+        };
     }
 }
 

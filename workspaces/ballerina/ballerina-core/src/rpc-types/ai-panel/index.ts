@@ -17,7 +17,7 @@
  */
 import { DataMapperModelResponse } from "../../interfaces/extended-lang-client";
 import { LoginMethod } from "../../state-machine-types";
-import { AddToProjectRequest, GetFromFileRequest, DeleteFromProjectRequest, ProjectSource, ProjectDiagnostics, PostProcessRequest, PostProcessResponse, FetchDataRequest, FetchDataResponse, TestGenerationRequest, TestGenerationResponse, TestGenerationMentions, AIChatSummary, DeveloperDocument, RequirementSpecification, LLMDiagnostics, GetModuleDirParams, AIPanelPrompt, AIMachineSnapshot, SubmitFeedbackRequest, RelevantLibrariesAndFunctionsRequest, GenerateOpenAPIRequest, GenerateCodeRequest, TestPlanGenerationRequest, TestGeneratorIntermediaryState, RepairParams, RelevantLibrariesAndFunctionsResponse, DocGenerationRequest, AddFilesToProjectRequest, MetadataWithAttachments, DatamapperModelContext, ProcessContextTypeCreationRequest, ProcessMappingParametersRequest } from "./interfaces";
+import { AddToProjectRequest, GetFromFileRequest, DeleteFromProjectRequest, ProjectSource, ProjectDiagnostics, PostProcessRequest, PostProcessResponse, FetchDataRequest, FetchDataResponse, TestGenerationRequest, TestGenerationResponse, TestGenerationMentions, AIChatSummary, DeveloperDocument, RequirementSpecification, LLMDiagnostics, GetModuleDirParams, AIPanelPrompt, AIMachineSnapshot, SubmitFeedbackRequest, RelevantLibrariesAndFunctionsRequest, GenerateOpenAPIRequest, GenerateCodeRequest, TestPlanGenerationRequest, TestGeneratorIntermediaryState, RepairParams, RelevantLibrariesAndFunctionsResponse, DocGenerationRequest, AddFilesToProjectRequest, MetadataWithAttachments, DatamapperModelContext, ProcessContextTypeCreationRequest, ProcessMappingParametersRequest, UsageDataResponse } from "./interfaces";
 
 export interface AIPanelAPI {
     // ==================================
@@ -83,4 +83,5 @@ export interface AIPanelAPI {
     getGeneratedDocumentation: (params: DocGenerationRequest) => Promise<void>;
     addFilesToProject: (params: AddFilesToProjectRequest) => Promise<boolean>;
     isUserAuthenticated: () => Promise<boolean>;
+    getUserUsageData: () => Promise<UsageDataResponse>;
 }
