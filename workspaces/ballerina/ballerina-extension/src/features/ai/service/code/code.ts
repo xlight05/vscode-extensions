@@ -46,7 +46,6 @@ import { getRequirementAnalysisCodeGenPrefix, getRequirementAnalysisTestGenPrefi
 import { createEditExecute, createEditTool, createMultiEditExecute, createBatchEditTool, createReadExecute, createReadTool, createWriteExecute, createWriteTool, FILE_BATCH_EDIT_TOOL_NAME, FILE_READ_TOOL_NAME, FILE_SINGLE_EDIT_TOOL_NAME, FILE_WRITE_TOOL_NAME } from "../libs/text_editor_tool";
 
 const SEARCH_LIBRARY_TOOL_NAME = "LibraryProviderTool";
-
 function appendFinalMessages(
     history: ModelMessage[],
     finalMessages: ModelMessage[],

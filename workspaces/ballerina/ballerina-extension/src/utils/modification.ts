@@ -22,8 +22,9 @@ import { URI } from "vscode-uri";
 import { writeFileSync } from "fs";
 import { StateMachine, updateView } from "../stateMachine";
 import { ArtifactNotificationHandler, ArtifactsUpdated } from "./project-artifacts-handler";
-import { dirname } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { dirname } from "path";
+import { existsSync, mkdirSync } from "fs";
+import { VisualizerRpcManager } from "../rpc-managers/visualizer/rpc-manager";
 
 interface UpdateFileContentRequest {
     filePath: string;
@@ -32,11 +33,14 @@ interface UpdateFileContentRequest {
     updateViewFlag?: boolean; // New flag to control updateView execution, default true
 }
 
-export async function applyModifications(fileName: string, modifications: STModification[]): Promise<SyntaxTreeResponse | NOT_SUPPORTED_TYPE> {
+export async function applyModifications(
+    fileName: string,
+    modifications: STModification[]
+): Promise<SyntaxTreeResponse | NOT_SUPPORTED_TYPE> {
     const ast = await InsertorDelete(modifications);
     return await StateMachine.langClient().stModify({
         documentIdentifier: { uri: Uri.file(fileName).toString() },
-        astModifications: ast
+        astModifications: ast,
     });
 }
 
@@ -47,14 +51,46 @@ export async function modifyFileContent(params: UpdateFileContentRequest): Promi
 
     if (doc) {
         const edit = new WorkspaceEdit();
-        edit.replace(URI.file(normalizedFilePath), new Range(new Position(0, 0), doc.lineAt(doc.lineCount - 1).range.end), content);
+        edit.replace(
+            URI.file(normalizedFilePath),
+            new Range(new Position(0, 0), doc.lineAt(doc.lineCount - 1).range.end),
+            content
+        );
         await workspace.applyEdit(edit);
         StateMachine.langClient().updateStatusBar();
         if (skipForceSave) {
             // Skip saving document and keep in dirty mode
             return true;
         }
-        return doc.save();
+        const saved = doc.save();
+        return new Promise((resolve, reject) => {
+            const notificationHandler = ArtifactNotificationHandler.getInstance();
+            // Subscribe to artifact updated notifications
+            let unsubscribe = notificationHandler.subscribe(ArtifactsUpdated.method, null, async (payload) => {
+                console.log("Received notification:", payload);
+                clearTimeout(timeoutId);
+
+                new VisualizerRpcManager().updateCurrentArtifactLocation({ artifacts: payload.data });
+                resolve(true);
+                StateMachine.setReadyMode();
+                unsubscribe();
+            });
+
+            // Set a timeout to reject if no notification is received within 10 seconds
+            const timeoutId = setTimeout(() => {
+                console.log("No artifact update notification received within 10 seconds");
+                unsubscribe();
+                StateMachine.setReadyMode();
+                reject(new Error("Operation timed out. Please try again."));
+            }, 10000);
+
+            // Clear the timeout when notification is received
+            const originalUnsubscribe = unsubscribe;
+            unsubscribe = () => {
+                clearTimeout(timeoutId);
+                originalUnsubscribe();
+            };
+        });
     } else {
         await writeBallerinaFileDidOpen(normalizedFilePath, content);
         StateMachine.langClient().updateStatusBar();
@@ -84,10 +120,10 @@ export function writeBallerinaFileDidOpenTemp(filePath: string, content: string)
     StateMachine.langClient().didOpen({
         textDocument: {
             uri: Uri.file(filePath).toString(),
-            languageId: 'ballerina',
+            languageId: "ballerina",
             version: 1,
-            text: content.trim()
-        }
+            text: content.trim(),
+        },
     });
 }
 
@@ -104,10 +140,10 @@ export async function writeBallerinaFileDidOpen(filePath: string, content: strin
     StateMachine.langClient().didOpen({
         textDocument: {
             uri: Uri.file(filePath).toString(),
-            languageId: 'ballerina',
+            languageId: "ballerina",
             version: 1,
-            text: content.trim()
-        }
+            text: content.trim(),
+        },
     });
 
     return new Promise((resolve, reject) => {

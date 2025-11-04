@@ -29,6 +29,7 @@ import {
     DocGenerationRequest,
     FetchDataRequest,
     FetchDataResponse,
+    GenerateAICodeRequest,
     GenerateCodeRequest,
     GenerateOpenAPIRequest,
     GetFromFileRequest,
@@ -69,6 +70,7 @@ import {
     generateInlineMappingCode,
     generateMappingCode,
     generateOpenAPI,
+    generateSelectiveEdits,
     generateTestPlan,
     getAIMachineSnapshot,
     getAccessToken,
@@ -335,5 +337,9 @@ export class AiPanelRpcClient implements AIPanelAPI {
 
     isUserAuthenticated(): Promise<boolean> {
         return this._messenger.sendRequest(isUserAuthenticated, HOST_EXTENSION);
+    }
+
+    generateSelectiveEdits(params: GenerateAICodeRequest): Promise<boolean> {
+        return this._messenger.sendRequest(generateSelectiveEdits, HOST_EXTENSION, params);
     }
 }

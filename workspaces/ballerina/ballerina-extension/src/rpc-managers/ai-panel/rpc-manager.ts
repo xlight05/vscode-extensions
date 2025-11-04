@@ -33,6 +33,7 @@ import {
     DocGenerationRequest,
     FetchDataRequest,
     FetchDataResponse,
+    GenerateAICodeRequest,
     GenerateCodeRequest,
     GenerateOpenAPIRequest,
     GetFromFileRequest,
@@ -73,6 +74,7 @@ import { fetchWithAuth } from "../../../src/features/ai/service/connection";
 import { generateContextTypes, generateInlineMappingCode, generateMappingCode, openChatWindowWithCommand } from "../../../src/features/ai/service/datamapper/datamapper";
 import { generateOpenAPISpec } from "../../../src/features/ai/service/openapi/openapi";
 import { AIStateMachine } from "../../../src/views/ai-panel/aiMachine";
+import { checkToken } from "../../../src/views/ai-panel/utils";
 import { extension } from "../../BalExtensionContext";
 import { generateCode, triggerGeneratedCodeRepair } from "../../features/ai/service/code/code";
 import { generateDocumentationForService } from "../../features/ai/service/documentation/doc_generator";
@@ -100,7 +102,7 @@ import {
 import { attemptRepairProject, checkProjectDiagnostics } from "./repair-utils";
 import { AIPanelAbortController, addToIntegration, cleanDiagnosticMessages, isErrorCode, requirementsSpecification, searchDocumentation } from "./utils";
 import { fetchData } from "./utils/fetch-data-utils";
-import { checkToken } from "../../../src/views/ai-panel/utils";
+import { generateEdits } from "../../features/ai/service/selective_edits/add";
 
 export class AiPanelRpcManager implements AIPanelAPI {
 
@@ -715,6 +717,17 @@ export class AiPanelRpcManager implements AIPanelAPI {
             return !!token;
         } catch (error) {
             return false;
+        }
+    }
+
+    async generateSelectiveEdits(params: GenerateAICodeRequest): Promise<boolean> {
+        if (params.type == "add") {
+            await generateEdits(params);
+            return true;
+        } else {
+            const range = params.range;
+            // modify
+            return true;
         }
     }
 }

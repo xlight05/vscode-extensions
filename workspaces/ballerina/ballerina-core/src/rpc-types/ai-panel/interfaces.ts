@@ -22,6 +22,7 @@ import { AIMachineContext, AIMachineStateValue } from "../../state-machine-types
 import { Command, TemplateId } from "../../interfaces/ai-panel";
 import { AllDataMapperSourceRequest, DataMapperSourceResponse, ExtendedDataMapperMetadata } from "../../interfaces/extended-lang-client";
 import { ComponentInfo, DataMapperMetadata, Diagnostics, ImportStatements, Project } from "../..";
+import { Position, Range } from "../../interfaces/common";
 
 // ==================================
 // General Interfaces
@@ -435,3 +436,20 @@ export interface DocGenerationRequest {
 
 export const GENERATE_TEST_AGAINST_THE_REQUIREMENT = "Generate tests against the requirements";
 export const GENERATE_CODE_AGAINST_THE_REQUIREMENT = "Generate code based on the requirements";
+
+interface BaseAICodeGenerationRequest {
+    prompt: string;
+    filePath: string;
+}
+
+export interface GenerateAICodeAddRequest extends BaseAICodeGenerationRequest {
+    type: 'add';
+    position: Position;
+}
+
+export interface GenerateAICodeEditRequest extends BaseAICodeGenerationRequest {
+    type: 'edit';
+    range: Range;
+}
+
+export type GenerateAICodeRequest = GenerateAICodeAddRequest | GenerateAICodeEditRequest;

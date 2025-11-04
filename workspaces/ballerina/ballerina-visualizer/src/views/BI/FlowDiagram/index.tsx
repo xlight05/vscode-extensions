@@ -781,18 +781,31 @@ export function BIFlowDiagram(props: BIFlowDiagramProps) {
         // Use hook to save original model for AI suggestions
         addDraftNode(parent, target);
         setFetchingAiSuggestions(true);
-        rpcClient
-            .getBIDiagramRpcClient()
-            .getAiSuggestions({ position: target, filePath: model.fileName, prompt })
-            .then((model) => {
-                if (model?.flowModel?.nodes?.length > 0) {
-                    setSuggestedModel(model.flowModel);
-                    suggestedText.current = model.suggestion;
-                }
-            })
-            .finally(() => {
-                setFetchingAiSuggestions(false);
-            });
+        rpcClient.getAiPanelRpcClient().generateSelectiveEdits({
+            type: "add",
+            prompt,
+            filePath: model.fileName,
+            position: {
+                line: target.startLine.line,
+                character: target.startLine.offset,
+            }
+        }).finally(() => {
+
+            //TODO: Re render?
+            setFetchingAiSuggestions(false);
+        });
+        // rpcClient
+        //     .getBIDiagramRpcClient()
+        //     .getAiSuggestions({ position: target, filePath: model.fileName, prompt })
+        //     .then((model) => {
+        //         if (model?.flowModel?.nodes?.length > 0) {
+        //             setSuggestedModel(model.flowModel);
+        //             suggestedText.current = model.suggestion;
+        //         }
+        //     })
+        //     .finally(() => {
+        //         setFetchingAiSuggestions(false);
+        //     });
     };
 
     const handleSearch = async (searchText: string, functionType: FUNCTION_TYPE, searchKind: SearchKind) => {

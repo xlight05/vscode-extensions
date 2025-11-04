@@ -144,6 +144,7 @@ import {
     FormDiagnosticsResponse,
     ExpressionTokensRequest,
     ExpressionTokensResponse,
+    GenerateAICodeAddRequest,
 } from "@wso2/ballerina-core";
 import * as fs from "fs";
 import * as path from 'path';
